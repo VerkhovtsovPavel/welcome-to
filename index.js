@@ -1,7 +1,4 @@
-﻿var mousePressed = false;
-var lastX, lastY;
-var ctx;
-var canvas;
+﻿var canvas;
 
 var drawHistory = {
     undoList: [],
@@ -9,76 +6,121 @@ var drawHistory = {
     saveState: function() {
       this.undoList.push(canvas.toDataURL());   
     },
+
     undo: function() {
       if(this.undoList.length) {
         var restore_state = this.undoList.pop();
         var image = new Image()
         image.src = restore_state
-        drawImage(image)
+        drawer.drawImage(image)
       }
     }
-  }
+}
+
+var drawer = {
+    lastX: 0,
+    lastY: 0,
+    mousePressed: false,
+    strokeStyle: "",
+    lineWidth: "",
+    canvasContext: null,
+
+
+    init: function() {
+        this.canvasContext = canvas.getContext('2d');
+        this.updateOptions();
+    },
+
+    updateOptions: function() {
+        var valueFromSelect = function(id) {
+            var select = document.getElementById(id);
+            return select.options[select.selectedIndex].value;
+        }
+
+        this.strokeStyle = valueFromSelect('color')
+        this.lineWidth = valueFromSelect('width')
+    },
+
+    start: function() {
+        this.mousePressed = true;
+    },
+
+    stop: function() {
+        this.mousePressed = false;
+    },
+
+    draw: function (pageX, pageY, isDown) {
+        if (this.mousePressed) {
+            x = pageX - canvas.offsetLeft;
+            y = pageY - canvas.offsetTop;
+            if (isDown) {
+                this.canvasContext.beginPath();
+                this.canvasContext.strokeStyle = this.strokeStyle
+                this.canvasContext.lineWidth = this.lineWidth
+                this.canvasContext.lineJoin = "round";
+                this.canvasContext.moveTo(this.lastX, this.lastY);
+                this.canvasContext.lineTo(x, y);
+                this.canvasContext.closePath();
+                this.canvasContext.stroke();
+            }
+            this.lastX = x;
+            this.lastY = y;
+        }
+    },  
+
+    drawImage: function (image) {
+        if(!image) {
+            var image = new Image();
+            image.src = 'map.png';
+        }
+        let context = this.canvasContext
+        image.onload = function () {
+            context.drawImage(image, 0, 0, 1091, 711);
+        }    
+    }  
+}
 
 function init() {
     canvas = document.getElementById('canvas')
-    ctx = canvas.getContext("2d");
-
-    $('#canvas').mousedown(function (e) {
-        mousePressed = true;
-        mouseX = e.pageX - $(this).offset().left;
-        mouseY = e.pageY - $(this).offset().top
-        draw(mouseX, mouseY, false);
+    let undo = document.getElementById('undo')
+    let clear = document.getElementById('clear')
+    let color = document.getElementById('color')
+    let width = document.getElementById('width')
+    
+    canvas.addEventListener('mousedown', function (e) {
+        drawer.start()
+        drawer.draw(e.pageX, e.pageY, false);
         drawHistory.saveState();
     });
 
-    $('#canvas').mousemove(function (e) {
-        if (mousePressed) {
-            mouseX = e.pageX - $(this).offset().left;
-            mouseY = e.pageY - $(this).offset().top
-            draw(mouseX, mouseY,  true);
-        }
+    canvas.addEventListener('mousemove', function (e) {
+        drawer.draw(e.pageX, e.pageY, true);
     });
 
-    $('#canvas').mouseup(function (e) {
-        mousePressed = false;
+    canvas.addEventListener('mouseup' ,function (e) {
+        drawer.stop()
     });
 
-    $('#canvas').mouseleave(function (e) {
-        mousePressed = false;
+    canvas.addEventListener('mouseleave', function (e) {
+        drawer.stop()
     });
 
-    $('#undo').click(function () {
-        undoLast();
+    undo.addEventListener('click', function () {
+        drawHistory.undo();
     });
-    drawImage();
-}
 
-function drawImage(image) {
-    if(!image) {
-        var image = new Image();
-        //image.crossOrigin = "Anonymous";
-        image.src = 'map.png';
-    }
-    $(image).load(function () {
-        ctx.drawImage(image, 0, 0, 1091, 711);
-    });    
-}
+    clear.addEventListener('click', function () {
+        drawer.drawImage();
+    });
 
-function undoLast() {
-    drawHistory.undo();
-}    
+    color.addEventListener('change', function() {
+        drawer.updateOptions()
+    });
 
-function draw(x, y, isDown) {
-    if (isDown) {
-        ctx.beginPath();
-        ctx.strokeStyle = $('#selColor').val();
-        ctx.lineWidth = $('#selWidth').val();
-        ctx.lineJoin = "round";
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(x, y);
-        ctx.closePath();
-        ctx.stroke();
-    }
-    lastX = x;
-    lastY = y;
+    width.addEventListener('change', function() {
+        drawer.updateOptions()
+    });
+
+    drawer.init();
+    drawer.drawImage();
 }
