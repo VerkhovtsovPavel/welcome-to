@@ -3,13 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head></head>
 <body onload="init();">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
     <script type="text/javascript" src="index.js"></script>
     <div align="center">
         <canvas id="canvas" width="1091" height="711" style="border:2px solid black"></canvas>
         <br /><br />
-        <button onclick="javascript:drawImage();return false;">Clear Area</button>
-        Line width : <select id="selWidth">
+        <button id="clear">Clear Area</button>
+        Line width : <select id="width">
             <option value="1">1</option>
             <option value="3" selected="selected">3</option>
             <option value="5">5</option>
@@ -17,7 +16,7 @@
             <option value="9">9</option>
             <option value="11">11</option>
         </select> 
-        Color : <select id="selColor">
+        Color : <select id="color">
             <option value="black" selected="selected">black</option>
             <option value="blue">blue</option>
             <option value="red">red</option>
@@ -25,7 +24,7 @@
             <option value="yellow">yellow</option>
             <option value="gray">gray</option>
         </select>
-        <button id="undo">Hold this button down to Undo</button>
+        <button id="undo">Undo</button>
     </div>
 </body>
 </html>
