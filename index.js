@@ -1,126 +1,37 @@
-﻿var canvas;
+class Game {
+  constructor(icon, path) {
+    this.icon = icon;
+    this.path = path;
+  }
+}
 
-var drawHistory = {
-    undoList: [],
+var data = [new Game("raging-bulls-icon.png", "board.html?game=raging-bulls"),
+            new Game("solo-tower-hack-logo.png", "board.html?game=solo-tower-hack"),
+            new Game("welcome-to-icon.jpg", "board.html?game=welcome-to")];
 
-    saveState: function() {
-      this.undoList.push(canvas.toDataURL());   
-    },
+var perRow = 2,
+    count = 0,
+    table = document.createElement("table"),
+    row = table.insertRow();
 
-    undo: function() {
-      if(this.undoList.length) {
-        var restore_state = this.undoList.pop();
-        var image = new Image()
-        image.src = restore_state
-        drawer.drawImage(image)
+  for (var i of data) {
+    var cell = row.insertCell();
+    var image = document.createElement("img");
+    image.src = i.icon
+    cell.appendChild(image);
+
+    cell.addEventListener("click", (function(path) {
+      return function () {
+        window.location.href = path;
       }
+    }(i.path)));
+
+    count++;
+    if (count%perRow==0) {
+      row = table.insertRow();
     }
-}
-
-var drawer = {
-    lastX: 0,
-    lastY: 0,
-    mousePressed: false,
-    strokeStyle: "",
-    lineWidth: "",
-    canvasContext: null,
-
-
-    init: function() {
-        this.canvasContext = canvas.getContext('2d');
-        this.updateOptions();
-    },
-
-    updateOptions: function() {
-        var valueFromSelect = function(id) {
-            var select = document.getElementById(id);
-            return select.options[select.selectedIndex].value;
-        }
-
-        this.strokeStyle = valueFromSelect('color')
-        this.lineWidth = valueFromSelect('width')
-    },
-
-    start: function() {
-        this.mousePressed = true;
-    },
-
-    stop: function() {
-        this.mousePressed = false;
-    },
-
-    draw: function (pageX, pageY, isDown) {
-        if (this.mousePressed) {
-            x = pageX - canvas.offsetLeft;
-            y = pageY - canvas.offsetTop;
-            if (isDown) {
-                this.canvasContext.beginPath();
-                this.canvasContext.strokeStyle = this.strokeStyle
-                this.canvasContext.lineWidth = this.lineWidth
-                this.canvasContext.lineJoin = "round";
-                this.canvasContext.moveTo(this.lastX, this.lastY);
-                this.canvasContext.lineTo(x, y);
-                this.canvasContext.closePath();
-                this.canvasContext.stroke();
-            }
-            this.lastX = x;
-            this.lastY = y;
-        }
-    },  
-
-    drawImage: function (image) {
-        if(!image) {
-            var image = new Image();
-            image.src = 'map.png';
-        }
-        let context = this.canvasContext
-        image.onload = function () {
-            context.drawImage(image, 0, 0, 1091, 711);
-        }    
-    }  
-}
+  }
 
 function init() {
-    canvas = document.getElementById('canvas')
-    let undo = document.getElementById('undo')
-    let clear = document.getElementById('clear')
-    let color = document.getElementById('color')
-    let width = document.getElementById('width')
-    
-    canvas.addEventListener('mousedown', function (e) {
-        drawer.start()
-        drawer.draw(e.pageX, e.pageY, false);
-        drawHistory.saveState();
-    });
-
-    canvas.addEventListener('mousemove', function (e) {
-        drawer.draw(e.pageX, e.pageY, true);
-    });
-
-    canvas.addEventListener('mouseup' ,function (e) {
-        drawer.stop()
-    });
-
-    canvas.addEventListener('mouseleave', function (e) {
-        drawer.stop()
-    });
-
-    undo.addEventListener('click', function () {
-        drawHistory.undo();
-    });
-
-    clear.addEventListener('click', function () {
-        drawer.drawImage();
-    });
-
-    color.addEventListener('change', function() {
-        drawer.updateOptions()
-    });
-
-    width.addEventListener('change', function() {
-        drawer.updateOptions()
-    });
-
-    drawer.init();
-    drawer.drawImage();
+  document.getElementById("container").appendChild(table);
 }
