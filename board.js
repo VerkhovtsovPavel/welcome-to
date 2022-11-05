@@ -20,6 +20,14 @@ var drawHistory = {
     }
 }
 
+var dice = {
+    sides: 6,
+    roll: function () {
+        var randomNumber = Math.floor(Math.random() * this.sides) + 1;
+        return randomNumber;
+    }
+}
+
 var drawer = {
     lastX: 0,
     lastY: 0,
@@ -89,6 +97,7 @@ function init() {
     let clear = document.getElementById('clear')
     let color = document.getElementById('color')
     let width = document.getElementById('width')
+    let button = document.getElementById('button');
     
     canvas.addEventListener('mousedown', function (e) {
         drawer.start()
@@ -123,6 +132,12 @@ function init() {
     width.addEventListener('change', function() {
         drawer.updateOptions()
     });
+
+    button.onclick = function() {
+        var result = dice.roll();
+        var placeholder = document.getElementById('placeholder');
+        placeholder.innerHTML = result;
+    };
 
     drawer.init();
     drawer.drawImage();

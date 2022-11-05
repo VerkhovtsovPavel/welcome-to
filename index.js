@@ -7,7 +7,7 @@ class Game {
 
 var data = [new Game("raging-bulls-icon.png", "board.html?game=raging-bulls"),
             new Game("solo-tower-hack-logo.png", "board.html?game=solo-tower-hack"),
-            new Game("welcome-to-icon.jpg", "board.html?game=welcome-to")];
+            new Game("welcome-to-icon.png", "board.html?game=welcome-to")];
 
 var perRow = 2,
     count = 0,
